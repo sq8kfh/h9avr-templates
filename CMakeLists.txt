@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 2.8.4)
 
 set(PROGRAMMER jtag3isp)
 
-set(SOURCE_FILES main.c can/can.c can/common.c can/common.h can/h9msg.h can/h9node.h can/h9node.h)
+set(SOURCE_FILES main.c can/can.c can/can.h can/common.c can/common.h can/h9msg.h)
 
 if(BOOTSTART)
     add_subdirectory(can)
@@ -75,7 +75,7 @@ add_additional_clean_file(${EEP_FILE})
 
 if(BOOTSTART)
     set(BOOTSTART_FLAG "-DBOOTSTART=${BOOTSTART}")
-    add_dependencies(${PROJECT_NAME} h9-bootloader)
+    add_dependencies(${PROJECT_NAME} h9avr-bootloader)
     set(HEX_WITH_BL_FILE "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}_with_bl.hex")
     add_additional_clean_file(${HEX_WITH_BL_FILE})
 endif(BOOTSTART)
