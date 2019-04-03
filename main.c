@@ -9,6 +9,7 @@
 #include <util/delay.h>
 
 #include "can/can.h"
+#include "h9uno.h"
 
 int main(void) {
     DDRB = 0xff;

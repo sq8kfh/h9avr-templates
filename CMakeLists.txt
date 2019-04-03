@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.4)
 
 #project(<project_name>)
-#set(MMCU atmega64m1)
-#set(FREQ 16000000)
-#set(BOOTSTART 0xf800) #in bytes
+set(MMCU atmega64m1)
+set(FREQ 16000000)
+set(BOOTSTART 0xf800) #in bytes
 
 set(PROGRAMMER jtag3isp)
 
