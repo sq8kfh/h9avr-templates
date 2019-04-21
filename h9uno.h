@@ -101,4 +101,9 @@
 #define D13_PIN PINC
 #define D13_PORT PORTC
 
+#define LED PD0
+#define LED_DDR DDRD
+#define LED_PIN PIND
+#define LED_PORT PORTD
+
 #endif /*H9UNO_H*/
