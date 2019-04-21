@@ -29,8 +29,8 @@ int main(void) {
 
     while (1) {
         if (led_counter == 0) {
-            LED_PORT ^= (1<<LED_PIN);
-            if (LED_PORT & (1<<LED_PIN)) {
+            LED_PORT ^= (1<<LED);
+            if (LED_PORT & (1<<LED)) {
                 led_counter = 0x1000;
             }
             else {
@@ -40,7 +40,7 @@ int main(void) {
         --led_counter;
 	/*
         h9msg_t cm;
-        LED_PORT |= (1<<LED_PIN);
+        LED_PORT |= (1<<LED);
         led_counter = 0x10000;
         if (CAN_get_msg(&cm)) {
             if (cm.type == H9MSG_TYPE_GET_REG &&
