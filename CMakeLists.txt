@@ -129,11 +129,8 @@ add_custom_target("eeprom"
         DEPENDS ${PROJECT_NAME}
         COMMENT "Eeprom uploading"
         )
-<<<<<<< HEAD
-=======
 
 add_custom_target("fuse"
         ${AVRDUDE} -p ${MMCU} -c ${PROGRAMMER} ${FUSE}
         COMMENT "Fuse uploading"
         )
->>>>>>> origin/led_fuse
