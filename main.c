@@ -11,26 +11,31 @@
 #include "can/can.h"
 #include "h9uno.h"
 
+#define STATUS_LED LED
+#define STATUS_LED_DDR LED_DDR
+#define STATUS_LED_PIN LED_PIN
+#define STATUS_LED_PORT LED_PORT
+
 int main(void) {
     DDRB = 0xff;
     DDRC = 0xff;
     DDRD = 0xff;
     DDRE = 0xff;
-    
-    LED_DDR |= (1<<LED);
-    
+
+    STATUS_LED_DDR |= (1<<STATUS_LED);
+
     CAN_init();
     sei();
 
     _delay_ms(100);
     CAN_send_turned_on_broadcast();
-    
+
     uint32_t led_counter = 0x1000;
 
     while (1) {
         if (led_counter == 0) {
-            LED_PORT ^= (1<<LED);
-            if (LED_PORT & (1<<LED)) {
+            STATUS_LED_PORT ^= (1<<STATUS_LED);
+            if (STATUS_LED_PORT & (1<<STATUS_LED)) {
                 led_counter = 0x1000;
             }
             else {
@@ -38,12 +43,12 @@ int main(void) {
             }
         }
         --led_counter;
-	/*
+
         h9msg_t cm;
-        LED_PORT |= (1<<LED);
-        led_counter = 0x10000;
         if (CAN_get_msg(&cm)) {
-            if (cm.type == H9MSG_TYPE_GET_REG &&
+            STATUS_LED_PORT |= (1<<STATUS_LED);
+            led_counter = 0x10000;
+            /*if (cm.type == H9MSG_TYPE_GET_REG &&
                      (cm.destination_id == can_node_id || cm.destination_id == H9MSG_BROADCAST_ID)) {
                 h9msg_t cm_res;
                 CAN_init_response_msg(&cm, &cm_res);
@@ -67,8 +72,7 @@ int main(void) {
                         CAN_put_msg(&cm_res);
                         break;
                 }
-            }
+            }*/
         }
-	*/
     }
 }
