@@ -112,8 +112,8 @@ add_custom_target("flash"
 
 if(BOOTSTART)
     add_custom_target(${PROJECT_NAME}_with_bl
-            COMMAND ${SREC_CAT} ${HEX_FILE} -I can/build/h9-bootloader.hex -I -o ${HEX_WITH_BL_FILE} -I
-            DEPENDS ${PROJECT_NAME} h9-bootloader
+            COMMAND ${SREC_CAT} ${HEX_FILE} -I can/build/h9avr-bootloader.hex -I -o ${HEX_WITH_BL_FILE} -I
+            DEPENDS ${PROJECT_NAME} h9avr-bootloader
             COMMENT "Flashs combinating"
             )
 
