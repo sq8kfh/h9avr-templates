@@ -1,12 +1,13 @@
 cmake_minimum_required(VERSION 2.8.4)
 
 #project(<>)
+#set(NODE_TYPE 2)
 #set(MMCU atmega32m1)
 set(FREQ 16000000)
 
 if (MMCU STREQUAL atmega64m1)
     set(BOOTSTART 0xf800) #in bytes m641
-    set(FUSE -U lfuse:w:0xf4:m -U hfuse:w:0xdd:m -U efuse:w:0xfe:m)
+    set(FUSE -U lfuse:w:0xf4:m -U hfuse:w:0xd5:m -U efuse:w:0xfe:m)
 elseif(MMCU STREQUAL atmega32m1)
     set(BOOTSTART 0x7800) #in bytes m321
     set(FUSE -U lfuse:w:0xf4:m -U hfuse:w:0xd3:m -U efuse:w:0xfe:m)

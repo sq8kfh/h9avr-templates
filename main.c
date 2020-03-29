@@ -58,6 +58,11 @@ int main(void) {
                         //cm_res.data[1] = ?;
                         CAN_put_msg(&cm_res);
                         break;
+                    default:
+                        cm_res.type = H9MSG_TYPE_ERROR;
+                        cm_res.data[0] = H9MSG_ERROR_INVALID_REGISTER;
+                        cm_res.dlc = 1;
+                        CAN_put_msg(&cm_res);
                 }
             }
             else if (cm.type == H9MSG_TYPE_SET_REG && cm.destination_id == can_node_id) {
@@ -70,7 +75,20 @@ int main(void) {
                         //cm_res.data[1] = ?;
                         CAN_put_msg(&cm_res);
                         break;
+                    default:
+                        cm_res.type = H9MSG_TYPE_ERROR;
+                        cm_res.data[0] = H9MSG_ERROR_INVALID_REGISTER;
+                        cm_res.dlc = 1;
+                        CAN_put_msg(&cm_res);
                 }
+            }
+            else {
+                h9msg_t cm_res;
+                CAN_init_response_msg(&cm, &cm_res);
+                cm_res.type = H9MSG_TYPE_ERROR;
+                cm_res.data[0] = H9MSG_ERROR_INVALID_MSG;
+                cm_res.dlc = 1;
+                CAN_put_msg(&cm_res);
             }*/
         }
     }
