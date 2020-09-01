@@ -1,8 +1,8 @@
-cmake_minimum_required(VERSION 2.8.4)
+cmake_minimum_required(VERSION 3.10)
 
-#project(<>)
-#set(NODE_TYPE 2)
-#set(MMCU atmega32m1)
+project(template VERSION 0.0)
+set(NODE_TYPE 3)
+set(MMCU atmega64m1)
 set(FREQ 16000000)
 
 if (MMCU STREQUAL atmega64m1)
@@ -11,25 +11,27 @@ if (MMCU STREQUAL atmega64m1)
 elseif(MMCU STREQUAL atmega32m1)
     set(BOOTSTART 0x7800) #in bytes m321
     set(FUSE -U lfuse:w:0xf4:m -U hfuse:w:0xd3:m -U efuse:w:0xfe:m)
+elseif(MMCU STREQUAL atmega16m1)
+    set(BOOTSTART 0x3800) #in bytes 16m1
+    set(FUSE -U lfuse:w:0xf4:m -U hfuse:w:0xd3:m -U efuse:w:0xfe:m)
 endif()
 
 set(PROGRAMMER jtag3isp)
 
-set(SOURCE_FILES main.c can/can.c can/can.h can/common.c can/common.h can/h9msg.h)
+set(SOURCE_FILES main.c can/can.c can/can.h can/h9msg.h)
+set(LINKER_SCRIPT custom_avr5.lds)
 
 if(BOOTSTART)
-    add_subdirectory(can)
+    add_subdirectory(bootloader)
 endif(BOOTSTART)
-
-set(CMAKE_SYSTEM_NAME Generic)
 
 set(PATHS "/usr/local/bin/ /opt/local/bin/")
 
 function(add_additional_clean_file FILENAME)
     get_directory_property(EXTRA_CLEAN_FILES ADDITIONAL_MAKE_CLEAN_FILES)
     set_directory_properties(
-        PROPERTIES
-        ADDITIONAL_MAKE_CLEAN_FILES "${EXTRA_CLEAN_FILES};${FILENAME}"
+            PROPERTIES
+            ADDITIONAL_MAKE_CLEAN_FILES "${EXTRA_CLEAN_FILES};${FILENAME}"
     )
 
     set_source_files_properties(${FILENAME} PROPERTIES GENERATED TRUE)
@@ -41,6 +43,8 @@ find_program(AVR_SIZE avr-size PATHS ${PATHS})
 find_program(AVRDUDE avrdude PATHS ${PATHS})
 find_program(SREC_CAT srec_cat PATHS ${PATHS})
 
+set(CMAKE_SYSTEM_NAME Generic)
+set(CMAKE_SYSTEM_PROCESSOR avr)
 set(CMAKE_C_COMPILER ${AVR_C_COMPILER})
 
 if(NOT BUILD_DIRECTORY)
@@ -65,6 +69,8 @@ endif(NOT PROGRAMMER)
 if(NOT MMCU)
     message(FATAL_ERROR "MMCU variable is not defined")
 endif(NOT MMCU)
+
+configure_file(config.h.in config.h)
 
 message(STATUS "Building ${PROJECT_NAME} for ${MMCU} with frequency ${FREQ}")
 message(STATUS "Source files: ${SOURCE_FILES}")
@@ -92,8 +98,9 @@ set_target_properties(
         ${PROJECT_NAME}
         PROPERTIES
         OUTPUT_NAME ${ELF_FILENAME}
+        LINK_DEPENDS ${LINKER_SCRIPT}
         COMPILE_FLAGS "-mmcu=${MMCU} -I. -gdwarf-2 ${BOOTSTART_FLAG} -DF_CPU=${FREQ}UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wall -Wno-unknown-pragmas -Wstrict-prototypes -Wundef -std=gnu99 -Wl,--gc-section"
-        LINK_FLAGS "-mmcu=${MMCU} -I. -gdwarf-2 -DF_CPU=${FREQ}UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wall -Wno-unknown-pragmas -Wstrict-prototypes -Wundef -std=gnu99 -Wundef -MD -MP -MF .dep/main.elf.d --output ${ELF_FILE} -Wl,-lc,--entry=main"
+        LINK_FLAGS "-mmcu=${MMCU} -I. -gdwarf-2 -DF_CPU=${FREQ}UL -Os -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -Wall -Wno-unknown-pragmas -Wstrict-prototypes -Wundef -std=gnu99 -Wundef -MD -MP -MF .dep/main.elf.d --output ${ELF_FILE} -Wl,-lc,--entry=main -Wl,-Map=${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${PROJECT_NAME}.map -T ${LINKER_SCRIPT}"
 )
 
 add_custom_command(
@@ -109,16 +116,16 @@ add_custom_target("flash"
         ${AVRDUDE} -p ${MMCU} -c ${PROGRAMMER} -U ${HEX_FILE}
         DEPENDS ${PROJECT_NAME}
         COMMENT "Flash uploading"
-)
+        )
 
 if(BOOTSTART)
     add_custom_target(${PROJECT_NAME}_with_bl
-            COMMAND ${SREC_CAT} ${HEX_FILE} -I can/build/h9avr-bootloader.hex -I -o ${HEX_WITH_BL_FILE} -I
+            COMMAND ${SREC_CAT} ${HEX_FILE} -I bootloader/build/h9avr-bootloader.hex -I -o ${HEX_WITH_BL_FILE} -I
             DEPENDS ${PROJECT_NAME} h9avr-bootloader
             COMMENT "Flashs combinating"
             )
 
-    add_custom_target("flashall"
+    add_custom_target("flash_all"
             ${AVRDUDE} -p ${MMCU} -c ${PROGRAMMER} -U ${HEX_WITH_BL_FILE}
             DEPENDS ${PROJECT_NAME}_with_bl
             COMMENT "Full flash uploading"
